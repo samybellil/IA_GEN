@@ -359,10 +359,12 @@ with col_right:
     st.altair_chart(chart_inter, use_container_width=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
+
 # ================= ANALYSE DE LA QUALITÉ =================
 st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
-st.markdown("### 🔍 Analyse détaillée de la qualité")
+st.markdown("### 🔍 Indicateurs de qualité détaillés")
 
+# Première ligne : indicateurs principaux
 col_q1, col_q2, col_q3, col_q4 = st.columns(4)
 
 with col_q1:
@@ -375,31 +377,121 @@ with col_q2:
     st.metric("📊 Médiane qualité", f"{qualite_median:.2%}")
 
 with col_q3:
-    mobile_sessions = len(filtered_df[filtered_df['device'] == 'mobile'])
-    st.metric("📱 Sessions mobile", f"{mobile_sessions}",
-              f"{mobile_sessions/len(filtered_df)*100:.1f}%")
+    sessions_parfaites = len(filtered_df[filtered_df['segments_non_reconnus'] == 0])
+    st.metric("✅ Sessions parfaites", f"{sessions_parfaites}",
+              f"{sessions_parfaites/len(filtered_df)*100:.1f}%")
 
 with col_q4:
-    web_sessions = len(filtered_df[filtered_df['device'] == 'webapp'])
-    st.metric("💻 Sessions web", f"{web_sessions}",
-              f"{web_sessions/len(filtered_df)*100:.1f}%")
+    sessions_problematiques = len(filtered_df[filtered_df['segments_non_reconnus'] > 5])
+    st.metric("⚠️ Sessions problématiques", f"{sessions_problematiques}",
+              f"{sessions_problematiques/len(filtered_df)*100:.1f}%")
+
+# Deuxième ligne : indicateurs supplémentaires
+col_q5, col_q6, col_q7, col_q8 = st.columns(4)
+
+with col_q5:
+    qualite_min = filtered_df['qualite_score'].min()
+    st.metric("📉 Score minimum", f"{qualite_min:.2%}")
+
+with col_q6:
+    qualite_max = filtered_df['qualite_score'].max()
+    st.metric("📈 Score maximum", f"{qualite_max:.2%}")
+
+with col_q7:
+    correlation = filtered_df['qualite_score'].corr(filtered_df['note_praticien'])
+    st.metric("📊 Corrélation qualité/note", f"{correlation:.3f}")
+
+with col_q8:
+    qualite_device = filtered_df.groupby('device')['qualite_score'].mean()
+    if 'webapp' in qualite_device.index and 'mobile' in qualite_device.index:
+        diff = qualite_device['webapp'] - qualite_device['mobile']
+        st.metric("📱 Différence web/mobile", f"{diff:.2%}")
 
 # Histogramme de la qualité
-qualite_hist = alt.Chart(filtered_df).transform_bin(
-    'qualite_bin', field='qualite_score', bin=alt.Bin(maxbins=20)
-).transform_aggregate(
-    count='count()', groupby=['qualite_bin']
-).mark_bar(
+st.markdown("<br>", unsafe_allow_html=True)
+st.markdown("#### 📊 Distribution des scores de qualité")
+
+# Créer des bins manuellement
+bins = [0, 0.2, 0.4, 0.6, 0.8, 1.0]
+labels = ['0-20%', '20-40%', '40-60%', '60-80%', '80-100%']
+filtered_df['qualite_bin'] = pd.cut(filtered_df['qualite_score'], bins=bins, labels=labels)
+
+qualite_binned = filtered_df['qualite_bin'].value_counts().reset_index()
+qualite_binned.columns = ['score_range', 'count']
+qualite_binned = qualite_binned.sort_values('score_range')
+
+qualite_hist = alt.Chart(qualite_binned).mark_bar(
     color='#10b981',
     cornerRadiusTopLeft=5,
     cornerRadiusTopRight=5
 ).encode(
-    x=alt.X('qualite_bin:Q', title='Score de qualité (0-1)', bin='binned'),
+    x=alt.X('score_range:N', title='Score de qualité', sort=labels),
     y=alt.Y('count:Q', title='Nombre de sessions'),
-    tooltip=['qualite_bin:Q', 'count:Q']
-).properties(height=200)
+    tooltip=['score_range', 'count']
+).properties(height=250)
 
 st.altair_chart(qualite_hist, use_container_width=True)
+
+st.markdown("</div>", unsafe_allow_html=True)
+
+# ================= NOTES DES PRATICIENS =================
+st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
+st.markdown("### ⭐ Notes des praticiens - Analyse détaillée")
+
+col_notes1, col_notes2 = st.columns([2, 1])
+
+with col_notes1:
+    # Histogramme des notes avec distribution normale
+    chart_notes_dist = alt.Chart(filtered_df).transform_density(
+        'note_praticien',
+        as_=['note_praticien', 'density']
+    ).mark_area(
+        opacity=0.3,
+        color='#f59e0b'
+    ).encode(
+        x='note_praticien:Q',
+        y='density:Q',
+        tooltip=['note_praticien:Q', 'density:Q']
+    ).properties(height=250)
+    
+    chart_notes_hist = alt.Chart(filtered_df).mark_bar(
+        color='#f59e0b',
+        opacity=0.7,
+        cornerRadiusTopLeft=5,
+        cornerRadiusTopRight=5
+    ).encode(
+        alt.X('note_praticien:Q', bin=alt.Bin(maxbins=10), title='Note (/5)'),
+        alt.Y('count()', title='Nombre de sessions'),
+        tooltip=['count()']
+    ).properties(height=250)
+    
+    chart_notes_combined = chart_notes_dist + chart_notes_hist
+    st.altair_chart(chart_notes_combined, use_container_width=True)
+
+with col_notes2:
+    # Statistiques détaillées des notes
+    st.markdown("#### Statistiques des notes")
+    
+    note_stats = filtered_df['note_praticien'].describe()
+    st.metric("**Moyenne**", f"{note_stats['mean']:.2f}/5", 
+              f"Médiane: {note_stats['50%']:.2f}")
+    
+    st.metric("**Minimum**", f"{note_stats['min']:.2f}/5", 
+              f"25e percentile: {note_stats['25%']:.2f}")
+    
+    st.metric("**Maximum**", f"{note_stats['max']:.2f}/5", 
+              f"75e percentile: {note_stats['75%']:.2f}")
+    
+    st.metric("**Écart-type**", f"{note_stats['std']:.2f}", 
+              f"Variance: {note_stats['std']**2:.3f}")
+    
+    # Notes par service
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("#### Top 3 services")
+    top_services_notes = filtered_df.groupby('service')['note_praticien'].mean().nlargest(3)
+    for service, note in top_services_notes.items():
+        st.metric(f"**{service}**", f"{note:.2f}/5")
+
 st.markdown("</div>", unsafe_allow_html=True)
 
 # ================= TABLEAU DES DONNÉES =================
@@ -408,7 +500,7 @@ st.markdown("### 📋 Données détaillées des sessions")
 
 # Sélection de colonnes à afficher
 columns_to_show = ['date', 'service', 'langue', 'duree_minutes', 
-                   'note_praticien', 'qualite_score', 'device']
+                   'note_praticien', 'qualite_score', 'segments_non_reconnus', 'device']
 
 st.dataframe(
     filtered_df[columns_to_show].head(20),
@@ -422,6 +514,10 @@ st.dataframe(
             format="%.2f",
             min_value=0,
             max_value=1
+        ),
+        "segments_non_reconnus": st.column_config.NumberColumn(
+            "Segments non reconnus",
+            format="%.0f"
         )
     }
 )

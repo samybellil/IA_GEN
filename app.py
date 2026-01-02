@@ -2,364 +2,275 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 from streamlit_extras.metric_cards import style_metric_cards
-from datetime import datetime, timedelta
+from datetime import datetime
 
 # ================= CONFIG =================
-st.set_page_config(page_title="Dashaalia Analytics", layout="wide", page_icon="📊")
+st.set_page_config(
+    page_title="Dashboard Dashaalia",
+    layout="wide",
+    page_icon="🏥"
+)
 
-# ================= CSS CUSTOM ULTRA PRO =================
+# ================= CSS DARK MODE PREMIUM =================
 st.markdown("""
 <style>
-/* Reset global */
-[data-testid="stAppViewContainer"] {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-}
-
-/* Sidebar premium */
-[data-testid="stSidebar"] {
-    background: rgba(15, 23, 42, 0.95) !important;
-    backdrop-filter: blur(10px);
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Cards avec effet verre */
-.card {
-    background: rgba(30, 41, 59, 0.7);
-    backdrop-filter: blur(10px);
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 24px;
-    margin-bottom: 24px;
-    transition: all 0.3s ease;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
-
-.card:hover {
-    border-color: #3b82f6;
-    transform: translateY(-2px);
-    box-shadow: 0 12px 48px rgba(59, 130, 246, 0.15);
-}
-
-/* Titres */
-h1, h2, h3 {
-    background: linear-gradient(135deg, #60a5fa 0%, #8b5cf6 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-weight: 700;
-}
-
-/* Boutons et filtres premium */
-.stSelectbox, .stMultiselect {
-    background: rgba(30, 41, 59, 0.8) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 10px !important;
-    color: white !important;
-}
-
-.stSelectbox div[data-baseweb="select"] > div {
-    background: rgba(30, 41, 59, 0.8) !important;
-    color: white !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-}
-
-/* Metrics cards */
-[data-testid="stMetricValue"] {
-    font-size: 2.5rem !important;
-    font-weight: 700;
-    background: linear-gradient(135deg, #60a5fa 0%, #8b5cf6 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-/* Séparateurs */
-hr {
-    border: none;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    margin: 2rem 0;
-}
-
-/* Badges */
-.badge {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    margin: 2px;
-}
-
-.badge-success {
-    background: rgba(34, 197, 94, 0.2);
-    color: #22c55e;
-    border: 1px solid rgba(34, 197, 94, 0.3);
-}
-
-.badge-warning {
-    background: rgba(234, 179, 8, 0.2);
-    color: #eab308;
-    border: 1px solid rgba(234, 179, 8, 0.3);
-}
-
-/* KPI Grid */
-.kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 16px;
-    margin: 24px 0;
-}
-
-/* Animation pour les cartes */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.card {
-    animation: fadeIn 0.5s ease-out;
-}
-
-/* Scrollbar personnalisée */
-::-webkit-scrollbar {
-    width: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: rgba(30, 41, 59, 0.5);
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #60a5fa 0%, #8b5cf6 100%);
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #3b82f6 0%, #7c3aed 100%);
-}
+    /* Fond dark mode élégant */
+    [data-testid="stAppViewContainer"] {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+    
+    /* Cartes avec effet verre */
+    .glass-card {
+        background: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .glass-card:hover {
+        border-color: #3b82f6;
+        transform: translateY(-2px);
+        box-shadow: 0 12px 48px rgba(59, 130, 246, 0.15);
+    }
+    
+    /* Titres avec gradient */
+    h1, h2, h3 {
+        background: linear-gradient(135deg, #60a5fa 0%, #8b5cf6 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 700;
+    }
+    
+    /* KPI metrics */
+    [data-testid="stMetricValue"] {
+        font-size: 2.2rem !important;
+        font-weight: 700;
+        background: linear-gradient(135deg, #60a5fa 0%, #8b5cf6 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    /* Badges colorés */
+    .badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin: 2px;
+    }
+    
+    .badge-success {
+        background: rgba(34, 197, 94, 0.2);
+        color: #22c55e;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    
+    .badge-warning {
+        background: rgba(234, 179, 8, 0.2);
+        color: #eab308;
+        border: 1px solid rgba(234, 179, 8, 0.3);
+    }
+    
+    .badge-info {
+        background: rgba(59, 130, 246, 0.2);
+        color: #3b82f6;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
 </style>
 """, unsafe_allow_html=True)
 
 # ================= TITRE PREMIUM =================
-col_title_left, col_title_center, col_title_right = st.columns([1, 2, 1])
-
-with col_title_center:
-    st.markdown("""
-    <div style="text-align: center; padding: 2rem 0;">
-        <h1 style="font-size: 2.8rem; margin-bottom: 0.5rem;">📊 Dashaalia Analytics</h1>
-        <p style="color: #94a3b8; font-size: 1.1rem; max-width: 600px; margin: 0 auto;">
-            Plateforme d'analyse des sessions médicales augmentées par IA
-        </p>
-        <div style="display: flex; justify-content: center; gap: 12px; margin-top: 1rem;">
-            <span class="badge badge-success">Temps réel</span>
-            <span class="badge badge-warning">IA Integrée</span>
-            <span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3);">
-                320 Sessions
-            </span>
-        </div>
+st.markdown("""
+<div style="text-align: center; padding: 2rem 0;">
+    <h1 style="font-size: 2.8rem; margin-bottom: 0.5rem;">🏥 Dashaalia Medical AI Dashboard</h1>
+    <p style="color: #94a3b8; font-size: 1.1rem;">
+        Analyse avancée des 320 sessions d'interprétariat médical augmenté par IA
+    </p>
+    <div style="display: flex; justify-content: center; gap: 12px; margin-top: 1rem;">
+        <span class="badge badge-success">320 Sessions</span>
+        <span class="badge badge-warning">IA Médicale</span>
+        <span class="badge badge-info">Temps Réel</span>
     </div>
-    """, unsafe_allow_html=True)
+</div>
+""", unsafe_allow_html=True)
 
-# ================= DATA =================
+# ================= CHARGEMENT DES DONNÉES =================
 @st.cache_data
 def load_data():
-    df = pd.read_csv("sessions_dataset_320.csv")
-    df['date'] = pd.to_datetime(df['date'])
-    return df
+    try:
+        df = pd.read_csv("sessions_dataset_320.csv")
+        
+        # Convertir les colonnes dates
+        df['date'] = pd.to_datetime(df['date'])
+        
+        # Calculer interactions_totales si pas déjà fait
+        if 'interactions_totales' not in df.columns:
+            df['interactions_totales'] = df['interactions_patient'] + df['interactions_praticien']
+        
+        # Vérifier et nettoyer les données
+        st.sidebar.success(f"✅ {len(df)} sessions chargées")
+        
+        return df
+    except Exception as e:
+        st.error(f"Erreur de chargement : {e}")
+        # Retourner un dataset exemple si le fichier n'existe pas
+        return pd.DataFrame({
+            'session_id': range(1, 321),
+            'date': pd.date_range('2024-01-01', periods=320),
+            'service': ['Cardiologie']*80 + ['Pédiatrie']*80 + ['Urgences']*80 + ['Radiologie']*80,
+            'langue': ['Anglais']*100 + ['Français']*100 + ['Arabe']*60 + ['Espagnol']*60,
+            'duree_minutes': np.random.randint(10, 120, 320),
+            'interactions_patient': np.random.randint(5, 50, 320),
+            'interactions_praticien': np.random.randint(5, 50, 320),
+            'interactions_totales': np.random.randint(10, 100, 320),
+            'note_praticien': np.random.uniform(1, 5, 320),
+            'qualite_score': np.random.uniform(0.5, 1.0, 320),
+            'segments_non_reconnus': np.random.randint(0, 10, 320),
+            'device': ['webapp']*160 + ['mobile']*160
+        })
 
 df = load_data()
 
-# ================= SIDEBAR PREMIUM =================
+# ================= SIDEBAR AVANCÉ =================
 with st.sidebar:
-    st.markdown("""
-    <div style="padding: 1rem 0 2rem 0;">
-        <h3 style="display: flex; align-items: center; gap: 10px;">
-            <span>⚙️</span> Filtres Avancés
-        </h3>
-        <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 2rem;">
-            Affinez votre analyse avec des filtres granulaires
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
+    st.markdown("### ⚙️ Filtres Avancés")
     
-    # Date range filter premium
+    # Filtre par date
     st.markdown("**📅 Période**")
-    col_date1, col_date2 = st.columns(2)
-    with col_date1:
-        date_min = st.date_input(
-            "De",
-            value=df['date'].min().date(),
-            key="date_min",
-            label_visibility="collapsed"
-        )
-    with col_date2:
-        date_max = st.date_input(
-            "À",
-            value=df['date'].max().date(),
-            key="date_max",
-            label_visibility="collapsed"
-        )
+    min_date = df['date'].min().date()
+    max_date = df['date'].max().date()
+    date_range = st.date_input(
+        "Sélectionnez la période",
+        value=(min_date, max_date),
+        min_value=min_date,
+        max_value=max_date
+    )
     
-    st.markdown("<div style='height: 20px'></div>", unsafe_allow_html=True)
+    if len(date_range) == 2:
+        start_date, end_date = date_range
+    else:
+        start_date, end_date = min_date, max_date
     
-    # Services avec icônes
-    st.markdown("**🏥 Services Médicaux**")
-    all_services = df['service'].unique()
-    selected_services = st.multiselect(
+    # Filtre par service
+    st.markdown("**🏥 Service Médical**")
+    services = st.multiselect(
         "Sélectionnez les services",
-        options=all_services,
-        default=all_services,
+        options=sorted(df['service'].unique()),
+        default=sorted(df['service'].unique()),
         label_visibility="collapsed"
     )
     
-    # Langues avec drapeaux
-    st.markdown("<div style='height: 20px'></div>", unsafe_allow_html=True)
-    st.markdown("**🌍 Langues**")
-    
-    # Mapping des langues vers des drapeaux
-    flag_map = {
-        'Anglais': '🇬🇧',
-        'Espagnol': '🇪🇸', 
-        'Arabe': '🇸🇦',
-        'Mandarin': '🇨🇳',
-        'Français': '🇫🇷',
-        'Allemand': '🇩🇪',
-        'Russe': '🇷🇺'
-    }
-    
-    lang_options = [f"{flag_map.get(lang, '🌐')} {lang}" for lang in df['langue'].unique()]
-    selected_langs_full = st.multiselect(
+    # Filtre par langue
+    st.markdown("**🌍 Langue**")
+    langues = st.multiselect(
         "Sélectionnez les langues",
-        options=lang_options,
-        default=lang_options,
+        options=sorted(df['langue'].unique()),
+        default=sorted(df['langue'].unique()),
         label_visibility="collapsed"
     )
-    selected_langs = [lang.split(' ', 1)[1] for lang in selected_langs_full]
     
-    # Device avec icônes
-    st.markdown("<div style='height: 20px'></div>", unsafe_allow_html=True)
-    st.markdown("**📱 Devices**")
-    
-    device_options = []
-    for device in df['device'].unique():
-        icon = "💻" if device.lower() == "web" else "📱"
-        device_options.append(f"{icon} {device}")
-    
-    selected_devices_full = st.multiselect(
+    # Filtre par device
+    st.markdown("**📱 Plateforme**")
+    devices = st.multiselect(
         "Sélectionnez les devices",
-        options=device_options,
-        default=device_options,
+        options=sorted(df['device'].unique()),
+        default=sorted(df['device'].unique()),
         label_visibility="collapsed"
     )
-    selected_devices = [device.split(' ', 1)[1] for device in selected_devices_full]
     
-    # Score de qualité slider
-    st.markdown("<div style='height: 20px'></div>", unsafe_allow_html=True)
+    # Filtre par score de qualité
     st.markdown("**⭐ Score de Qualité**")
-    min_score, max_score = st.slider(
-        "Plage de score",
+    qualite_min, qualite_max = st.slider(
+        "Plage de score (0-1)",
         min_value=float(df['qualite_score'].min()),
         max_value=float(df['qualite_score'].max()),
         value=(float(df['qualite_score'].min()), float(df['qualite_score'].max())),
-        step=0.1,
+        step=0.01,
         label_visibility="collapsed"
     )
     
     # Bouton reset
-    st.markdown("<div style='height: 30px'></div>", unsafe_allow_html=True)
-    if st.button("🔄 Réinitialiser les filtres", use_container_width=True):
+    if st.button("🔄 Réinitialiser tous les filtres", use_container_width=True):
         st.rerun()
+    
+    st.markdown("</div>", unsafe_allow_html=True)
 
-# ================= FILTRAGE DES DONNÉES =================
+# ================= APPLICATION DES FILTRES =================
 filtered_df = df[
-    (df['service'].isin(selected_services)) &
-    (df['langue'].isin(selected_langs)) &
-    (df['device'].isin(selected_devices)) &
-    (df['qualite_score'] >= min_score) &
-    (df['qualite_score'] <= max_score) &
-    (df['date'].dt.date >= date_min) &
-    (df['date'].dt.date <= date_max)
+    (df['date'].dt.date >= start_date) &
+    (df['date'].dt.date <= end_date) &
+    (df['service'].isin(services)) &
+    (df['langue'].isin(langues)) &
+    (df['device'].isin(devices)) &
+    (df['qualite_score'] >= qualite_min) &
+    (df['qualite_score'] <= qualite_max)
 ]
 
-# ================= KPI GRID PREMIUM =================
-st.markdown("<div class='card'>", unsafe_allow_html=True)
-
-st.markdown("<h3>📈 Vue d'ensemble</h3>", unsafe_allow_html=True)
+# ================= KPI CARDS =================
+st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
 
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.markdown("""
-    <div style="text-align: center;">
-        <div style="font-size: 0.9rem; color: #94a3b8; margin-bottom: 8px;">Sessions totales</div>
-        <div style="font-size: 2.2rem; font-weight: 700;">{:,}</div>
-        <div style="font-size: 0.8rem; color: #22c55e; margin-top: 4px;">
-            ↑ {:.1%} du dataset
-        </div>
-    </div>
-    """.format(len(filtered_df), len(filtered_df)/len(df)), unsafe_allow_html=True)
+    sessions_count = len(filtered_df)
+    st.metric(
+        "📊 Sessions analysées",
+        f"{sessions_count:,}",
+        f"{sessions_count/len(df)*100:.1f}% du total"
+    )
 
 with col2:
     avg_duration = filtered_df['duree_minutes'].mean()
-    st.markdown("""
-    <div style="text-align: center;">
-        <div style="font-size: 0.9rem; color: #94a3b8; margin-bottom: 8px;">Durée moyenne</div>
-        <div style="font-size: 2.2rem; font-weight: 700;">{:.1f} min</div>
-        <div style="font-size: 0.8rem; color: #22c55e; margin-top: 4px;">
-            ⏱️ ±{:.1f} min écart-type
-        </div>
-    </div>
-    """.format(avg_duration, filtered_df['duree_minutes'].std()), unsafe_allow_html=True)
+    st.metric(
+        "⏱️ Durée moyenne",
+        f"{avg_duration:.1f} min",
+        f"±{filtered_df['duree_minutes'].std():.1f} min"
+    )
 
 with col3:
     avg_quality = filtered_df['qualite_score'].mean()
-    quality_color = "#22c55e" if avg_quality >= 7.5 else "#eab308" if avg_quality >= 5 else "#ef4444"
-    st.markdown("""
-    <div style="text-align: center;">
-        <div style="font-size: 0.9rem; color: #94a3b8; margin-bottom: 8px;">Score qualité</div>
-        <div style="font-size: 2.2rem; font-weight: 700; color: {};">{:.2f}/10</div>
-        <div style="font-size: 0.8rem; color: {}; margin-top: 4px;">
-            {} qualité
-        </div>
-    </div>
-    """.format(quality_color, avg_quality, quality_color, 
-              "Excellente" if avg_quality >= 7.5 else "Bonne" if avg_quality >= 5 else "À améliorer"), 
-    unsafe_allow_html=True)
+    quality_color = "#22c55e" if avg_quality >= 0.8 else "#eab308" if avg_quality >= 0.6 else "#ef4444"
+    st.metric(
+        "⭐ Score qualité moyen",
+        f"{avg_quality:.2%}",
+        delta_color="off",
+        help="0-100% (plus haut = meilleur)"
+    )
 
 with col4:
-    interactions_ratio = filtered_df['interactions_patient'].sum() / filtered_df['interactions_praticien'].sum() if filtered_df['interactions_praticien'].sum() > 0 else 0
-    st.markdown("""
-    <div style="text-align: center;">
-        <div style="font-size: 0.9rem; color: #94a3b8; margin-bottom: 8px;">Ratio Patient/Praticien</div>
-        <div style="font-size: 2.2rem; font-weight: 700;">{:.2f}</div>
-        <div style="font-size: 0.8rem; color: #3b82f6; margin-top: 4px;">
-            {} interactions
-        </div>
-    </div>
-    """.format(interactions_ratio, filtered_df[['interactions_patient', 'interactions_praticien']].sum().sum()), 
-    unsafe_allow_html=True)
+    avg_note = filtered_df['note_praticien'].mean()
+    st.metric(
+        "👨‍⚕️ Note praticien",
+        f"{avg_note:.1f}/5",
+        f"{filtered_df['note_praticien'].std():.1f} écart-type"
+    )
 
 st.markdown("</div>", unsafe_allow_html=True)
 
-# ================= GRAPHIQUES PREMIUM =================
+# ================= VISUALISATIONS =================
 col_left, col_right = st.columns(2)
 
 with col_left:
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.markdown("<h3>📈 Évolution des sessions</h3>", unsafe_allow_html=True)
+    # ÉVOLUTION DES SESSIONS
+    st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
+    st.markdown("### 📈 Évolution temporelle")
     
-    # Préparation des données
     evolution_df = filtered_df.groupby(filtered_df['date'].dt.to_period('W')).size().reset_index(name='sessions')
     evolution_df['date'] = evolution_df['date'].astype(str)
     
-    # Graphique évolution avec aire
     chart_evo = alt.Chart(evolution_df).mark_area(
         interpolate='monotone',
         line={'color': '#3b82f6', 'width': 3},
         color=alt.Gradient(
             gradient='linear',
             stops=[
-                alt.GradientStop(color='rgba(59, 130, 246, 0.3)', offset=0),
+                alt.GradientStop(color='rgba(59, 130, 246, 0.4)', offset=0),
                 alt.GradientStop(color='rgba(59, 130, 246, 0)', offset=1)
             ]
         )
@@ -372,15 +283,13 @@ with col_left:
     st.altair_chart(chart_evo, use_container_width=True)
     st.markdown("</div>", unsafe_allow_html=True)
     
-    # Top langues
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.markdown("<h3>🌍 Distribution par langue</h3>", unsafe_allow_html=True)
+    # RÉPARTITION PAR LANGUE
+    st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
+    st.markdown("### 🌍 Distribution par langue")
     
     langues_df = filtered_df['langue'].value_counts().reset_index()
     langues_df.columns = ['langue', 'count']
-    langues_df['percentage'] = (langues_df['count'] / langues_df['count'].sum() * 100).round(1)
     
-    # Bar chart horizontal avec pourcentages
     chart_lang = alt.Chart(langues_df).mark_bar(
         cornerRadiusTopRight=8,
         cornerRadiusBottomRight=8,
@@ -394,52 +303,49 @@ with col_left:
     ).encode(
         y=alt.Y('langue:N', title='', sort='-x'),
         x=alt.X('count:Q', title='Nombre de sessions'),
-        tooltip=['langue', 'count', alt.Tooltip('percentage:Q', title='Pourcentage', format='.1f')]
+        tooltip=['langue', 'count']
     ).properties(height=250)
     
     st.altair_chart(chart_lang, use_container_width=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
 with col_right:
-    # Distribution par service
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.markdown("<h3>🏥 Services les plus demandés</h3>", unsafe_allow_html=True)
+    # RÉPARTITION PAR SERVICE
+    st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
+    st.markdown("### 🏥 Services médicaux")
     
     service_df = filtered_df['service'].value_counts().reset_index()
     service_df.columns = ['service', 'count']
     
-    # Donut chart interactif
     chart_service = alt.Chart(service_df).mark_arc(
-        innerRadius=80,
-        outerRadius=140
+        innerRadius=60,
+        outerRadius=120
     ).encode(
         theta=alt.Theta(field="count", type="quantitative"),
         color=alt.Color(field="service", type="nominal", 
                        scale=alt.Scale(scheme='tableau10'),
-                       legend=alt.Legend(orient='bottom', title=None)),
-        tooltip=['service', 'count', 
-                alt.Tooltip('count:Q', title='Pourcentage', format='.1%')]
+                       legend=alt.Legend(orient='right', title=None)),
+        tooltip=['service', 'count']
     ).properties(height=300)
     
     st.altair_chart(chart_service, use_container_width=True)
     st.markdown("</div>", unsafe_allow_html=True)
     
-    # Interactions patient vs praticien
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.markdown("<h3>💬 Analyse des interactions</h3>", unsafe_allow_html=True)
+    # INTERACTIONS PATIENT vs PRATICIEN
+    st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
+    st.markdown("### 💬 Analyse des interactions")
     
-    interactions_melted = filtered_df[['interactions_patient', 'interactions_praticien']].mean().reset_index()
-    interactions_melted.columns = ['type', 'moyenne']
-    interactions_melted['type'] = interactions_melted['type'].replace({
+    interactions_avg = filtered_df[['interactions_patient', 'interactions_praticien']].mean().reset_index()
+    interactions_avg.columns = ['type', 'moyenne']
+    interactions_avg['type'] = interactions_avg['type'].replace({
         'interactions_patient': '👤 Patient',
         'interactions_praticien': '👨‍⚕️ Praticien'
     })
     
-    # Bar chart groupé
-    chart_inter = alt.Chart(interactions_melted).mark_bar(
+    chart_inter = alt.Chart(interactions_avg).mark_bar(
         cornerRadiusTopLeft=8,
         cornerRadiusTopRight=8,
-        width=50
+        width=60
     ).encode(
         x=alt.X('type:N', title='', axis=alt.Axis(labelAngle=0)),
         y=alt.Y('moyenne:Q', title='Nombre moyen d\'interactions'),
@@ -447,67 +353,104 @@ with col_right:
             domain=['👤 Patient', '👨‍⚕️ Praticien'],
             range=['#8b5cf6', '#06b6d4']
         ), legend=None),
-        tooltip=['type', alt.Tooltip('moyenne:Q', title='Moyenne', format='.2f')]
+        tooltip=['type', alt.Tooltip('moyenne:Q', title='Moyenne', format='.1f')]
     ).properties(height=250)
     
     st.altair_chart(chart_inter, use_container_width=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# ================= TABLEAU DE DONNÉES =================
-st.markdown("<div class='card'>", unsafe_allow_html=True)
-st.markdown("<h3>📋 Données détaillées</h3>", unsafe_allow_html=True)
+# ================= ANALYSE DE LA QUALITÉ =================
+st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
+st.markdown("### 🔍 Analyse détaillée de la qualité")
 
-# Statistiques résumées
-col_stat1, col_stat2, col_stat3, col_stat4 = st.columns(4)
+col_q1, col_q2, col_q3, col_q4 = st.columns(4)
 
-with col_stat1:
-    st.metric("Note moyenne praticien", f"{filtered_df['note_praticien'].mean():.1f}/5")
+with col_q1:
+    segments_moy = filtered_df['segments_non_reconnus'].mean()
+    st.metric("🎧 Segments non reconnus", f"{segments_moy:.1f}", 
+              f"Total: {filtered_df['segments_non_reconnus'].sum():.0f}")
 
-with col_stat2:
-    st.metric("Segments non reconnus", f"{filtered_df['segments_non_reconnus'].mean():.1f}")
+with col_q2:
+    qualite_median = filtered_df['qualite_score'].median()
+    st.metric("📊 Médiane qualité", f"{qualite_median:.2%}")
 
-with col_stat3:
-    st.metric("Sessions mobile", 
-             f"{len(filtered_df[filtered_df['device'] == 'mobile'])}",
-             f"{len(filtered_df[filtered_df['device'] == 'mobile'])/len(filtered_df)*100:.1f}%")
+with col_q3:
+    mobile_sessions = len(filtered_df[filtered_df['device'] == 'mobile'])
+    st.metric("📱 Sessions mobile", f"{mobile_sessions}",
+              f"{mobile_sessions/len(filtered_df)*100:.1f}%")
 
-with col_stat4:
-    top_lang = filtered_df['langue'].mode()[0] if len(filtered_df) > 0 else "N/A"
-    st.metric("Langue dominante", top_lang)
+with col_q4:
+    web_sessions = len(filtered_df[filtered_df['device'] == 'webapp'])
+    st.metric("💻 Sessions web", f"{web_sessions}",
+              f"{web_sessions/len(filtered_df)*100:.1f}%")
 
-# Tableau avec échantillon
+# Histogramme de la qualité
+qualite_hist = alt.Chart(filtered_df).transform_bin(
+    'qualite_bin', field='qualite_score', bin=alt.Bin(maxbins=20)
+).transform_aggregate(
+    count='count()', groupby=['qualite_bin']
+).mark_bar(
+    color='#10b981',
+    cornerRadiusTopLeft=5,
+    cornerRadiusTopRight=5
+).encode(
+    x=alt.X('qualite_bin:Q', title='Score de qualité (0-1)', bin='binned'),
+    y=alt.Y('count:Q', title='Nombre de sessions'),
+    tooltip=['qualite_bin:Q', 'count:Q']
+).properties(height=200)
+
+st.altair_chart(qualite_hist, use_container_width=True)
+st.markdown("</div>", unsafe_allow_html=True)
+
+# ================= TABLEAU DES DONNÉES =================
+st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
+st.markdown("### 📋 Données détaillées des sessions")
+
+# Sélection de colonnes à afficher
+columns_to_show = ['date', 'service', 'langue', 'duree_minutes', 
+                   'note_praticien', 'qualite_score', 'device']
+
 st.dataframe(
-    filtered_df.head(10)[['date', 'service', 'langue', 'duree_minutes', 'qualite_score', 'note_praticien']],
+    filtered_df[columns_to_show].head(20),
     use_container_width=True,
     column_config={
         "date": st.column_config.DatetimeColumn("Date", format="DD/MM/YYYY"),
+        "duree_minutes": st.column_config.NumberColumn("Durée (min)", format="%.0f"),
+        "note_praticien": st.column_config.NumberColumn("Note", format="%.1f/5"),
         "qualite_score": st.column_config.ProgressColumn(
             "Score qualité",
-            format="%.1f",
+            format="%.2f",
             min_value=0,
-            max_value=10
-        ),
-        "note_praticien": st.column_config.NumberColumn(
-            "Note praticien",
-            format="%.1f/5"
+            max_value=1
         )
     }
 )
 
+# Bouton d'export
+if st.button("📥 Exporter les données filtrées (CSV)", use_container_width=True):
+    csv = filtered_df.to_csv(index=False).encode('utf-8')
+    st.download_button(
+        label="Télécharger CSV",
+        data=csv,
+        file_name=f"dashaalia_export_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
+        mime="text/csv"
+    )
+
 st.markdown("</div>", unsafe_allow_html=True)
 
-# ================= FOOTER PREMIUM =================
+# ================= FOOTER =================
 st.markdown("""
 <hr>
 <div style="text-align: center; padding: 2rem 0; color: #64748b;">
     <div style="font-size: 0.9rem; margin-bottom: 0.5rem;">
-        📊 Dashaalia Analytics • Dashboard v2.0 • 
-        <span style="color: #3b82f6;">{:,} sessions analysées</span> • 
-        Dernière mise à jour: {}
+        🚀 Dashboard Dashaalia • Projet B3 DEV IA • 
+        <span style="color: #3b82f6;">Analyse de {:,} sessions</span> • 
+        Généré avec Streamlit & Altair
     </div>
     <div style="font-size: 0.8rem;">
-        Projet B3 DEV IA • Interface optimisée pour analyse médicale • 
-        <span style="color: #22c55e;">● Système opérationnel</span>
+        Interface médicale augmentée par IA • 
+        <span style="color: #22c55e;">● Système opérationnel</span> • 
+        Dernière mise à jour: {}
     </div>
 </div>
 """.format(len(filtered_df), datetime.now().strftime("%d/%m/%Y %H:%M")), unsafe_allow_html=True)
